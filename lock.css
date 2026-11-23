@@ -1,0 +1,155 @@
+/* Floor Fix lock screen. Command Center console look. Silent. No site facts. */
+:root {
+  --bg: #070b12;
+  --pane: #0b1524;
+  --pane2: #101c30;
+  --line: rgba(124, 196, 255, 0.24);
+  --edge: rgba(124, 196, 255, 0.32);
+  --text: #eaf2ff;
+  --muted: #9fb6d9;
+  --accent: #7cc4ff;
+  --warn: #ffb627;
+  --ok: #39d0ff;
+  --cc-font: "Segoe UI", "Noto Sans", "DejaVu Sans", system-ui, -apple-system, Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--cc-font);
+  font-size: 18px;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+[hidden] { display: none !important; }
+.lock-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: calc(var(--safe-t) + 8px) calc(var(--safe-r) + 14px) 8px calc(var(--safe-l) + 14px);
+  background: rgba(7, 11, 18, 0.95);
+  border-bottom: 1px solid var(--edge);
+}
+.lock-mark {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--edge);
+  background: var(--pane2);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+.lock-bar h1 {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 900;
+  color: #fff;
+}
+.lock {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 22px calc(var(--safe-r) + 18px) calc(var(--safe-b) + 28px) calc(var(--safe-l) + 18px);
+}
+.console-panel {
+  background: var(--pane);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 16px 18px;
+}
+.ptitle {
+  margin: 0 0 12px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.lock p { margin: 0 0 14px; color: var(--text); }
+.lock .hint { color: var(--muted); font-size: 0.95rem; }
+.lab {
+  display: block;
+  margin: 0 0 8px;
+  color: #cfe0f7;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.field {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 14px;
+  background: #0a1330;
+  color: #eaf2ff;
+  border: 2px solid #4aa3ff;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 1.05rem;
+}
+.field:focus {
+  outline: none;
+  border-color: #ffd166;
+  box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.25);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 14px;
+  padding: 0 16px;
+  background: #17406f;
+  border: 1px solid #4aa3ff;
+  border-radius: 10px;
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.err {
+  margin-top: 12px;
+  color: var(--warn);
+  font-weight: 700;
+}
+.prog {
+  margin-top: 14px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+.prog-bar {
+  margin-top: 8px;
+  height: 8px;
+  border: 1px solid var(--edge);
+  border-radius: 99px;
+  background: #0a1330;
+  overflow: hidden;
+}
+.prog-bar > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #4aa3ff;
+}
