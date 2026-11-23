@@ -1,7 +1,7 @@
 /* Floor Fix hosted shell. Offline first. Same origin only. Silent.
    Serves the lock screen and encrypted packs from the core cache.
    Serves unlocked library files from the on-device plain cache only. */
-const VERSION = 'c7fe10335092-r2';
+const VERSION = 'c7fe10335092-r3';
 const CORE = 'ffh-core-' + VERSION;
 const PLAIN = 'ffh-plain-' + VERSION;
 const SHELL = [
@@ -33,11 +33,23 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((k) => {
+    const stale = keys.filter((k) => {
       if (k === CORE || k === PLAIN) return false;
       return k.indexOf('ffh-core-') === 0 || k.indexOf('ffh-plain-') === 0;
-    }).map((k) => caches.delete(k)));
+    });
+    await Promise.all(stale.map((k) => caches.delete(k)));
     await self.clients.claim();
+    // Only force a reload when this phone still had an older pack cached.
+    // A first-time install must not bounce the lock screen.
+    if (stale.length) {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      await Promise.all(windows.map(async (c) => {
+        try { c.postMessage({ type: 'ffh-reload', version: VERSION }); } catch (e) { /* old clients may ignore */ }
+        if (c.navigate) {
+          try { await c.navigate(c.url); } catch (e) { /* some browsers refuse navigate */ }
+        }
+      }));
+    }
   })());
 });
 

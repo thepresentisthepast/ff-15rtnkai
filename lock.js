@@ -276,12 +276,65 @@
     });
   }
 
+  var SW_RELOAD_KEY = 'ffh-sw-reload';
+
+  function swReloadFlag() {
+    try { return sessionStorage.getItem(SW_RELOAD_KEY) === '1'; } catch (e) { return false; }
+  }
+  function markSwReload() {
+    try { sessionStorage.setItem(SW_RELOAD_KEY, '1'); } catch (e) { /* ignore */ }
+  }
+  function clearSwReload() {
+    try { sessionStorage.removeItem(SW_RELOAD_KEY); } catch (e) { /* ignore */ }
+  }
+  function kickWorker(w) {
+    if (w) {
+      try { w.postMessage('ffh-skip-waiting'); } catch (e) { /* ignore */ }
+      try { w.postMessage('ffh-claim'); } catch (e) { /* ignore */ }
+    }
+  }
+  function reloadOnce() {
+    if (swReloadFlag()) return false;
+    markSwReload();
+    location.reload();
+    return true;
+  }
+
   function registerSW() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return Promise.resolve(null);
     return navigator.serviceWorker.register(pathURL('sw.js')).then(function (reg) {
-      if (reg.waiting) reg.waiting.postMessage('ffh-skip-waiting');
+      kickWorker(reg.waiting);
+      if (reg.installing) {
+        reg.installing.addEventListener('statechange', function () { kickWorker(reg.waiting || reg.installing); });
+      }
       return navigator.serviceWorker.ready.then(function () { return reg; });
     }).catch(function () { return null; });
+  }
+
+  function waitForUpdatedSW(reg) {
+    if (!reg) return Promise.resolve();
+    return Promise.resolve(reg.update()).catch(function () { return null; }).then(function () {
+      var incoming = reg.installing || reg.waiting;
+      if (!incoming) { clearSwReload(); return; }
+      if (swReloadFlag()) return;
+      kickWorker(incoming);
+      return new Promise(function (res) {
+        var done = false;
+        function finish() { if (!done) { done = true; res(); } }
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (reloadOnce()) return;
+          finish();
+        });
+        incoming.addEventListener('statechange', function () {
+          if (incoming.state === 'installed' || incoming.state === 'activating' || incoming.state === 'activated') {
+            kickWorker(incoming);
+          }
+          if (incoming.state === 'activated' && !swReloadFlag()) finish();
+        });
+        // First install can take a while (the library is large). Keep waiting.
+        setTimeout(finish, 60000);
+      });
+    });
   }
 
   function installFetchGate() {
@@ -353,8 +406,18 @@
   function start() {
     var form = $('lock-form');
     if (form) form.addEventListener('submit', onSubmit);
-    registerSW();
-    alreadyUnlocked().then(function (ok) {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', function (ev) {
+        if (ev.data && ev.data.type === 'ffh-reload') reloadOnce();
+      });
+    }
+    setProg('Checking for an update…', 0.02);
+    registerSW().then(function (reg) {
+      return waitForUpdatedSW(reg);
+    }).then(function () {
+      setProg('', 0);
+      return alreadyUnlocked();
+    }).then(function (ok) {
       if (!ok) {
         var input = $('pass');
         if (input) input.focus();
@@ -364,6 +427,7 @@
       installFetchGate();
       return bootApp();
     }).catch(function () {
+      setProg('', 0);
       var input = $('pass');
       if (input) input.focus();
     });

@@ -26,12 +26,12 @@
     <section class="console-panel" aria-labelledby="lock-title">
       <div class="ptitle" id="lock-title">Unlock // This phone</div>
       <p>Type your passcode. After it unlocks once, this phone can open the app without a network.</p>
-      <p class="hint">Four words and two numbers, lowercase.</p>
+      <p class="hint">Enter your PIN.</p>
       <form id="lock-form" action="#" method="post" autocomplete="off">
         <label class="lab" for="pass">Passcode</label>
         <input id="pass" class="field" type="password" name="pass" enterkeyhint="go"
                autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"
-               inputmode="text" required>
+               inputmode="numeric" required>
         <button class="btn" id="unlock" type="submit">Unlock</button>
       </form>
       <p class="err" id="lock-err" hidden></p>
