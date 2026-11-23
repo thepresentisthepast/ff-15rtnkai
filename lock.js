@@ -67,8 +67,12 @@
       return r.json();
     }).then(function (j) { meta = j; return j; });
   }
-  function plainName(pack) { return 'ffh-plain-' + pack; }
-  function coreName(pack) { return 'ffh-core-' + pack; }
+  function cacheId(m) {
+    if (!m) return '';
+    return m.cache || (m.pack + (m.rev ? '-' + m.rev : ''));
+  }
+  function plainName(m) { return 'ffh-plain-' + cacheId(m); }
+  function coreName(m) { return 'ffh-core-' + cacheId(m); }
 
   function deriveKey(pass, salt, iter) {
     var enc = new TextEncoder();
@@ -196,8 +200,8 @@
       var salt = b64(m.salt);
       setProg('Checking the passcode…', 0.05);
       return deriveKey(pass, salt, m.iter).then(function (key) {
-        return caches.open(plainName(m.pack)).then(function (plain) {
-          return caches.open(coreName(m.pack)).then(function (core) {
+        return caches.open(plainName(m)).then(function (plain) {
+          return caches.open(coreName(m)).then(function (core) {
             var files = fileList(m, 'core');
             setProg('Unlocking the library…', 0.08);
             return decryptGroup(key, files, bundleMap(m, 'core'), plain, core, function (msg, frac) {
@@ -207,7 +211,9 @@
             }).then(function () {
               return crypto.subtle.exportKey('raw', key).then(function (raw) {
                 return idbSet('pack', m.pack).then(function () {
-                  return idbSet('key', raw);
+                  return idbSet('cache', cacheId(m)).then(function () {
+                    return idbSet('key', raw);
+                  });
                 }).then(function () {
                   return idbSet('unlocked', 1);
                 });
@@ -223,9 +229,9 @@
     return loadMeta().then(function (m) {
       return idbGet('unlocked').then(function (u) {
         if (!u) return false;
-        return idbGet('pack').then(function (p) {
-          if (p !== m.pack) return false;
-          return caches.open(plainName(m.pack)).then(function (c) {
+        return idbGet('cache').then(function (cid) {
+          if (cid !== cacheId(m)) return false;
+          return caches.open(plainName(m)).then(function (c) {
             return c.match(pathURL('data/pack.json'), { ignoreSearch: true }).then(function (hit) {
               return !!hit;
             });
@@ -242,7 +248,7 @@
     document.head.appendChild(l);
   }
   function loadScript(path) {
-    return caches.open(plainName(meta.pack)).then(function (c) {
+    return caches.open(plainName(meta)).then(function (c) {
       return c.match(pathURL(path), { ignoreSearch: true });
     }).then(function (r) {
       if (!r) throw new Error('missing ' + path);
@@ -285,7 +291,7 @@
       var u = new URL(req.url, location.href);
       if (u.origin !== location.origin) return orig(input, init);
       if (!meta) return orig(input, init);
-      return caches.open(plainName(meta.pack)).then(function (c) {
+      return caches.open(plainName(meta)).then(function (c) {
         return c.match(req, { ignoreSearch: true }).then(function (hit) {
           if (hit) return hit;
           var rel = u.pathname.replace(new URL('./', location.href).pathname, '');
@@ -302,10 +308,10 @@
     return idbGet('key').then(function (raw) {
       if (!raw) return null;
       return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['decrypt']).then(function (key) {
-        return caches.open(coreName(meta.pack)).then(function (core) {
+        return caches.open(coreName(meta)).then(function (core) {
           return getBundle(f.b, core).then(function (buf) {
             return decryptSlice(key, buf, f.o, f.n).then(function (plain) {
-              return caches.open(plainName(meta.pack)).then(function (c) {
+              return caches.open(plainName(meta)).then(function (c) {
                 return putPlain(c, path, plain, f.t).then(function () {
                   return new Response(plain, { headers: { 'Content-Type': f.t || 'application/octet-stream' } });
                 });
