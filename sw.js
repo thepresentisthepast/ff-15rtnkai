@@ -1,7 +1,7 @@
 /* Floor Fix hosted shell. Offline first. Same origin only. Silent.
    Serves the lock screen and encrypted packs from the core cache.
    Serves unlocked library files from the on-device plain cache only. */
-const VERSION = '234fa7b26ac9-r4';
+const VERSION = '234fa7b26ac9-r5';
 const CORE = 'ffh-core-' + VERSION;
 const PLAIN = 'ffh-plain-' + VERSION;
 const SHELL = [

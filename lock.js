@@ -4,8 +4,8 @@
   var BASE = new URL('./', location.href);
   var IDB_NAME = 'ffh-lock';
   var IDB_STORE = 'kv';
-  var APP_CSS = ['styles.css', 'cc.css', 'vendor/b6_floor_map.css'];
-  var APP_JS = ['vendor/nc_art.js', 'vendor/ff_engine.js', 'vendor/b6_floor_map.js', 'app_more.js', 'app.js'];
+  var APP_CSS = ['styles.css', 'cc.css', 'vendor/b6_floor_map.css', 'vendor/b6_cooling_map.css'];
+  var APP_JS = ['vendor/nc_art.js', 'vendor/ff_icons.js', 'vendor/ff_engine.js', 'vendor/b6_floor_map.js', 'vendor/b6_cooling_map.js', 'app_more.js', 'app_lanes.js', 'app_train.js', 'app.js'];
   var dbp = null;
   var meta = null;
   var booting = false;
