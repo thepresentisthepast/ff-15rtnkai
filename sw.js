@@ -1,7 +1,7 @@
 /* Floor Fix hosted shell. Offline first. Same origin only. Silent.
    Serves the lock screen and encrypted packs from the core cache.
    Serves unlocked library files from the on-device plain cache only. */
-const VERSION = 'c7fe10335092-r3';
+const VERSION = '234fa7b26ac9-r4';
 const CORE = 'ffh-core-' + VERSION;
 const PLAIN = 'ffh-plain-' + VERSION;
 const SHELL = [
@@ -19,7 +19,7 @@ const SHELL = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png'
 ];
-const BUNDLES = ["./b/c00.bin"];
+const BUNDLES = ["./b/c00.bin", "./b/c01.bin"];
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
